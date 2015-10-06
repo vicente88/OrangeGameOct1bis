@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>    
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" /> 
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>	
+	<!-- Angular -->
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+	<!-- App -->	
+	<!--<script src="js/orange_lobby.js"></script>-->
+
+	<script>
+$(document).ready(function(){
+    $(".btn1").click(function(){		
+        $("#ptest").fadeOut();
+    });
+    $(".btn2").click(function(){
+        $("#ptest").fadeIn();
+    });
+});
+</script>
+
+
+
+<script>
+
+	var app = angular.module('orangeApp', []);
+	app.controller('gameCtrl', function($scope) {
+		$scope.test = totalOranges;
+		$scope.startGame=false;
+		$scope.readyGame=true;		
+	});
+	
+	
+	
+	var playernumber = "player1";
+	var totalOranges = 0;
+	var savedOranges= {player1:0, player2:0, player3:0, player4:0, player5:0, player6:0, player7:0,player8:0};
+	var eatenOranges =0;
+	var dayPoints= 0;
+	var totalPoints= 100;
+	var totalSavings= 0;
+	var translateOranges=[10,9,8,7,6,5,4,3,2,1,0];
+    var totalDays=0;
+    var oet=0;
+	var round=0;
+	var countdown=60;
+	var t, CCOUNT;
+
+window.onload=healthBar;
+
+function healthBar(){
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	ctx.clearRect(0, 0, c.width, c.height);
+	var grd = ctx.createLinearGradient(0, 0, 170, 0);
+	grd.addColorStop(0, "red");
+	grd.addColorStop(0.2, "orange");
+	grd.addColorStop(0.3, "yellow");
+	grd.addColorStop(0.45, "chartreuse");
+	grd.addColorStop(0.6, "lime");
+	grd.addColorStop(0.8, "limegreen");
+	grd.addColorStop(1, "green");
+	ctx.fillStyle = grd;
+	ctx.fillRect(0, 0, (totalPoints/100*200), 50);	
+}	
+//Controls instructions, to get transition effect, needed to change both opacity and visibility (so instructions don't later block clicks on the gamepage.
+function timer(){  					
+	countdown--;
+	document.getElementById("timeField").innerHTML = countdown; 
+	t=setTimeout(timer,1000);
+		if (countdown <= 0)  {
+		document.getElementById("timeField").innerHTML = "Sunset!";
+		clearTimeout(timer,1000);
+		return;
+		}
+}
+function startFunc(){
+	//This resets timer
+	//document.getElementById("timeField").innerHTML = 60;
+	//Starts game timer				
+	//timer();		
+}
+
+function resetDay(){
+	//This resets timer
+		clearTimeout(t);
+		CCOUNT=60;
+		countdown=60;
+				document.getElementById("timeField").innerHTML = "Sunset!";
+				document.getElementById("alive").style.display= "none";
+
+	if (totalPoints <=0) {
+	    document.getElementById("alive").style.display= "block";
+		document.getElementById("endGame").style.visibility="visible";
+        gameOver();	
+	}	
+		if (totalDays >=10) {
+		document.getElementById("endGame").style.visibility="visible";
+	    document.getElementById("alive").innerHTML = "Game Over";
+		gameOver();	
+	}	
+	}	
+function saveOrange() {
+		if (totalOranges > 0) {
+			savedOranges[playernumber]=savedOranges[playernumber]+1;
+			totalOranges=totalOranges-1;
+			totalSavings=totalSavings+1;
+			if(totalOranges<=0) {
+				endDay();
+				}
+		}
+	}	 
+function endDay () {
+	    document.getElementById("dish").style.visibility ="visible";
+		document.getElementById("noLuck").style.visibility="hidden";
+	}	
+function metabolism() {
+totalPoints=totalPoints-30;
+healthBar();
+dayPoints=dayPoints-30;
+document.getElementById("totalPoints").innerHTML=totalPoints;
+}	
+function eatOrange (){
+fadeOut();    
+animationUtility2();
+animationUtility();
+    document.getElementById("comment").innerHTML="mangiato";
+	if (totalOranges >0){
+		eatenOranges=eatenOranges+1;
+		totalOranges=totalOranges-1;
+	if (eatenOranges<=11) { 
+		dayPoints+=translateOranges[eatenOranges-1]; 
+		document.getElementById("marginalUtility").innerHTML=translateOranges[eatenOranges-1];
+		totalPoints+=translateOranges[eatenOranges-1];
+		document.getElementById("totalPoints").innerHTML=totalPoints;
+		}
+		if(totalOranges<=0) { endDay(); };
+    }
+}
+function nextDay (){	
+		metabolism();
+		document.getElementById("alive").style.display= "none";
+    if(Math.random() < 0.5) {
+		document.getElementById("dragOrange1").style.visibility ="visible";
+		document.getElementById("dragOrange2").style.visibility ="visible";	 
+		document.getElementById("dragOrange3").style.visibility ="visible";
+		document.getElementById("dragOrange4").style.visibility ="visible";
+		document.getElementById("dragOrange5").style.visibility ="visible";
+		document.getElementById("dragOrange6").style.visibility ="visible";
+		document.getElementById("dragOrange7").style.visibility ="visible";
+		document.getElementById("dragOrange8").style.visibility ="visible";
+		document.getElementById("dragOrange9").style.visibility ="visible";
+		document.getElementById("dragOrange10").style.visibility ="visible";
+		totalOranges=10;
+		}
+	else {
+        totalOranges=0;
+		endDay();
+		document.getElementById("noLuck").style.visibility="visible";
+		animationNoLuck2();
+		animationNoLuck();
+		}
+	eatenOranges=0;
+	dayPoints=0;
+    document.getElementById("marginalUtility").innerHTML=0;
+    marginalUtility=0;
+    totalDays++;
+    document.getElementById("totalDays").innerHTML=totalDays;
+	document.getElementById("alive").style.display= "none";
+
+	if (totalPoints<=0) {
+	document.getElementById("alive").style.display = "block";
+	document.getElementById("endGame").style.visibility="visible";
+	gameOver();
+	}
+	
+	saveData();
+}    
+
+var BASE_URL = 'https://orangegameadp.firebaseio.com/history/';
+var myDataRef = new Firebase(BASE_URL);
+
+var orangeData = {};
+function saveData(){
+	orangeData[totalDays] = {eatenOranges: eatenOranges, savedOranges: savedOranges, dayPoints: dayPoints};
+	console.log(orangeData);
+	myDataRef.push(orangeData);
+}
+
+//use this to send to firebase
+//
+
+
+//This function gets data from input and sends to firebase using set function, set() function can send value or json object, uses child() to get variable (can also use push function to add to a list).
+function sendMessage(){
+console.log("sending message to " + i);
+for (i=1; i<9; i++){
+	var text = document.getElementById("message"+i).value;
+		myDataRef.child("message"+i).set(text);
+ console.log("sending message to " + i + " is complete.");		
+		}
+//This callback function is alerted when firebase value changes. It uses the on() function, firebase sends back a snapshot
+		myDataRef.on('value', function(snapshot) {
+			var dragon = snapshot.val();
+			alert(JSON.stringify(dragon));
+		})};
+	
+//sendOrange button creates new values and sends them to Firebase
+function sendOrange(i){
+    console.log("sending orange to " + i);
+    var x = savedOranges[playernumber] - 1;
+    myDataRef.child(playernumber).set(x);
+    var y = savedOranges[i] + 1;
+    myDataRef.child(i).set(y);
+    console.log("sending orange to " + i + " is complete.");
+	savedOranges[playernumber]=savedOranges[playernumber]-1;
+	totalSavings=totalSavings-1;
+	}
+//callback function for sent oranges. 
+//That means everyone's browser will get the message that player 1 has one less orange in their basket. 
+function gameID(){
+myDataRef.child(playernumber).on('value'), function(snapshot) {
+        savedOranges[playernumber] = snapshot.val();
+}}
+/*function fadeOut(){
+$(document).ready(function(){
+$(".btn1").click(function(){
+$("marginalUtility").delay("slow").fadeOut({duration: 400});
+})
+}
+*/
+function animationUtility() {
+document.getElementById("marginalUtility").style.display ="none";
+setTimeout(function(){ 
+document.getElementById("marginalUtility").style.display ="block";
+}, 30);
+}
+
+function animationUtility2() {
+document.getElementById("marginalUtility").style.display ="block";
+}
+
+function animationBasket() {
+document.getElementById("basketFull").style.display ="none";
+setTimeout(function(){ 
+document.getElementById("basketFull").style.display ="block";
+}, 30);
+}
+
+function animationBasket2() {
+document.getElementById("basketFull").style.display ="block";
+}
+
+function animationNoLuck() {
+document.getElementById("noLuck").style.display ="none";
+setTimeout(function(){ 
+document.getElementById("noLuck").style.display ="block";
+}, 30);
+}
+function animationNoLuck2() {
+document.getElementById("noLuck").style.display ="block";
+}
+
+function animationGameOver2() {
+document.getElementById("endGame").style.display ="block";
+}
+function animationGameOver() {
+document.getElementById("endGame").style.display ="none";
+setTimeout(function(){ 
+document.getElementById("endGame").style.display ="block";
+}, 30);
+}
+function dragStart(event) {
+    event.dataTransfer.setData("Text", event.target.id);	
+	//These two lines make the original orange disappear, and set the dragged image to icon with id "dragIcon"
+	setTimeout(function (){
+		event.target.style.visibility="hidden";
+	}, 10);	
+	event.dataTransfer.setDragImage(dragIcon, 50, 50);		
+}
+function dragEnd(event){
+	var x = event.dataTransfer.dropEffect;
+	console.log("the dropEffect is: " + x);
+	if (x == "none"){
+		event.target.style.visibility="visible";
+	}
+}
+function allowDrop(event) {
+    event.preventDefault();
+}
+function dropEat(event) {
+	event.preventDefault();
+    var data = event.dataTransfer.getData("Text");
+	healthBar();
+	if (data.search("orangeSaved") == 0) {
+		eatenOranges=eatenOranges+1;
+		savedOranges[playernumber]=savedOranges[playernumber]-1;
+		totalSavings=totalSavings-1;
+	    if (eatenOranges-1<12) {
+			dayPoints+=translateOranges[eatenOranges-1]; 
+			document.getElementById("marginalUtility").innerHTML=translateOranges[eatenOranges-1];
+			totalPoints+=translateOranges[eatenOranges-1];
+			document.getElementById("totalPoints").innerHTML=totalPoints;
+			}
+		else {
+			dayPoints+=translateOranges[11];
+			document.getElementById("marginalUtility").innerHTML=translateOranges[11];
+			totalPoints+=translateOranges[11];
+			document.getElementById("totalPoints").innerHTML=totalPoints;
+		    }
+	}
+	else {
+			eatOrange();	
+		}
+	for (var i = 0; i < savedOranges[playernumber]; i++) {
+	fadeOut();
+	animationUtility2();
+	animationUtility();
+    	if(i<=15){
+	document.getElementById("basketFull").style.visibility="hidden";
+	}
+	}
+}
+function dropSave(event) {
+    event.preventDefault();
+	saveOrange();
+    var x = "";
+    for (var i = 0; i < savedOranges[playernumber]; i++) {
+        x += "<img id='orangeSaved" + i + "' src='http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png' draggable='true' ondragstart='dragStart(event)' ondragend='dragEnd(event)' alt='Smiley Orange' width='35' height='35'>";
+	}
+    document.getElementById("dropBasket").innerHTML = x; 
+	document.getElementById("basketImage").style.visibility="visible";	
+	if (i>=15)
+	{document.getElementById("basketFull").style.visibility="visible";
+    animationBasket2();
+	animationBasket();
+	}
+	else {
+	document.getElementById("basketFull").style.visibility="hidden";}
+	return;
+	}
+$(document).ready(function(){
+    $("#toggleControls").click(function(){
+        $("#controls").toggle();
+		console.log("I am hiding");
+    });
+});	
+
+
+
+function gameOver() {
+//activate end game animations
+document.getElementById("endGame").style.visibility="visible";
+animationGameOver2();
+animationGameOver();
+//let startGame button reappear again
+$scope.startGame="false";
+$scope.readyDay="false";
+//reset values
+totalSavings=0;
+totaldays=0;
+totalPoints=100;
+document.getElementById("health").innerHTML=totalPoints;
+document.getElementById("totalDays").innerHTML=totalDays;
+}
+
+/*
+//Called by user decision. Checks if rabbit is ready, if not checks again in 1 second. If so, combines turtle and rabbit moves to determine outcome and payoffs, updates score, shows next round button.
+function calculateScores() {
+		roundData[totalDays - 1] = "D"+totalDays+",P1totalPoints," + totalPoints + ",P1totalSavings," + totalSavings + ",P1eatenOranges" + eatenOranges + rabbitMove.charAt(0) + ",turtle:" + p1Payoffs[outcome] + ",rabbit:" + p2Payoffs[outcome]; 
+		//alert(roundData);
+	}
+}
+
+//Send data to server
+function submitData(){
+	var xmlhttp=new XMLHttpRequest();
+ 	xmlhttp.onreadystatechange=function() {
+		if (xmlhttp.readyState==4 && xmlhttp.status==200){
+			//alert("data submitted, " + xmlhttp.responseText);
+		}
+	}
+	xmlhttp.open("POST","orangeGameSubmit.php",true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send("q=" + playerScore + "," + roundData);
+}
+*/
+</script>
+
+<style type="text/css"> 
+<!--This is required for relative positioning to work.-->
+html, body{height: 100%; width: 100%;}
+			
+body {
+ 	font-family:"comic sans ms";
+	font-size: large;
+	font-weight:bold;
+	color: #FFFFFF;
+	background-color: #45d1ff;
+	background: linear-gradient( #45d1ff, #09f);	
+	background:-webkit-linear-gradient(top, #45d1ff, #09f);	
+	min-height:1000px;
+}	 
+#title {
+	position: relative;
+	text-align:center;
+	background-color:Chartreuse;
+	color: OrangeRed;
+} 
+#gamePage {
+	position: absolute;	
+	border: 0px solid black;
+	border-radius:25px;
+	background: url("http://s1.at.atcdn.net/wp-content/uploads/2011/03/100-Things-To-Do-Before-You-Die-100-Wilson-Island-Featured-Image.jpg"); 
+	background-size: cover;
+	height: 584px;
+	width: 1000px;	
+	z-index:-1;
+}				
+.controlPanel {
+	border-radius:25px;	
+	padding: 5px;
+	background-color:#D2691E;
+	text-align: center;	
+	margin-top: 50px;	
+	margin-left:auto;
+	margin-right:auto;
+	position:absolute;
+	top:550px;
+}
+#controls {
+	border-radius:25px;	
+	padding: 5px;
+	background-color:#D2691E;
+	text-align: center;	
+	width:200px;
+	position:absolute; 
+	top: 600px; 
+	left: 375px;
+}
+#layoutTable{
+position: relative;
+	margin-left:50px;
+	border: 0px solid yellow;
+	top: 15px;
+}
+
+#payoffs {
+	position: relative;
+	border-radius:25px;					
+	width: 425px;
+	padding: 5px;
+	text-align: center;
+	font-family: comic sans ms;
+	margin-left:auto;
+	margin-right:auto;
+	height: 45px; 		
+	margin-left:auto;
+	margin-right:auto;				
+}
+
+#startDrag {
+   position: relative;
+   border-radius:25px;					
+   width: 425px;
+   padding: 5px;
+   text-align: center;
+   height: 90px; 
+   z-index:1;
+   margin-top:0px;
+  border: 0px solid red;
+}
+#dishOranges {				
+   width: 225px;
+   height: 200px;
+   padding: 5px;
+   text-align: center;			   
+   border:0px solid red;  
+   z-index:0;
+}				
+	
+#basketOranges {
+	top: 200px;			
+    margin-left: auto;
+    margin-right: auto;
+	padding: 1px;
+	border: 0px solid red;
+	width: 225px;
+	padding: 5px;
+	text-align: center;				
+	font-family: comic sans ms;
+	height: 200px; 
+	z-index:1;       
+			}
+.instructions {	
+    position: absolute;
+	font-color: black;
+	top:100px;	
+	margin-left:-278px;
+	left:50%;	
+	background-color:Chartreuse;
+	width:500px;
+	padding:25px;
+	border:3px solid #a1a1a1;
+	border-radius:25px;
+	z-index: 2;
+	-webkit-transition: visibility 400ms, opacity 400ms; 
+	transition: visibility 400ms, opacity 400ms;
+}			
+.market {	
+	position: absolute;
+	top:100px;	
+	margin-left:-278px;
+	left:50%;	
+	background-color:Chartreuse;
+	width:500px;
+	padding:25px;
+	border:3px solid #a1a1a1;
+	border-radius:25px;
+	z-index: 2;
+	-webkit-transition: visibility 400ms, opacity 400ms; 
+	transition: visibility 400ms, opacity 400ms;
+}	
+
+.buttons {
+	border-radius: 25px;				
+	font-family: "comic sans ms";			
+ }	 
+
+.hello {
+    color:#FF6C47;
+	font-size: 30px;
+	opacity:0;
+	-webkit-animation: fading 3s linear;
+	animation: fading 2s linear;
+}
+
+@keyframes fading {
+    0%   {opacity:0;}   
+	10%   {opacity:1;}
+	80%   {opacity:1;}
+	100% {opacity:0;} 
+}
+
+
+.other{
+	vertical-align: middle;
+	border-radius: 25px;
+	margin-left:auto;
+	margin-right:auto;
+	width: 70px;	
+    height: 55px;
+	text-align: center;
+    background-color: #FF6C47 !important;
+	-webkit-animation: growing .7s linear .5s 3;
+	animation: growing .7s linear .5s 3 ;
+		}
+		
+@keyframes growing {
+    0%   {width:70px; height:55px;}
+    50%  {width:54px; height:35px;} 	
+	100% {width:70px; height:55px;} 
+}		   
+</style>
+
+
+
+</head>
+
+<body>
+    
+
+
+<p id="ptest">This is a paragraph.</p>
+
+<button class="btn1">Fade out</button>
+<button class="btn2">Fade in</button>
+
+
+
+
+<div ng-app="orangeApp" ng-controller="gameCtrl" style="position: relative; margin-top:50px; margin-right: auto; margin-left:auto;  width:1000px;">
+<div id="title"><h1>The Lonely Island Survivor Challenge<h1></div>
+	<!--This has the background picture-->
+	<div id="gamePage"></div>
+    
+
+	
+	<!--This table is for the layout-->
+	<table id="layoutTable"><tr><td>
+	
+		<!--Basket-->	
+	<div id = "basketOranges" ondrop="dropSave(event)" ondragover="allowDrop(event)">		   
+	   <img src= "http://www.clker.com/cliparts/y/w/q/7/x/g/empty-basket-hi.png" style="width:200px; height:200px;" alt= "Empty Basket" id="basketImage" >
+        <div id="dropBasket" style="position:relative; top:-110px;" ondrop="dropSave(event)" ondragover="allowDrop(event)">	  
+	  </div> 
+	  <span id="basketFull" class="hello" style="visibility:hidden">Full!</span></div>		   
+
+	</td><td>	
+	
+	<!--ScoreBoard-->	  
+			  
+	<table id= "payoffs" border=0>	
+		<tr><td><h4> Health:</h4><p><span id="totalPoints" class="hello">0</span></p></td>
+		<td><canvas id="myCanvas" width="300" height="50" style="position:relative; border:1px solid #d3d3d3;"></canvas></td>
+		<td><p>Day</p><span class="buttons" id="totalDays">0</span></td></tr>
+	</table>				
+        <table>
+		<tr>
+		<td>
+    	<button class="btn btn-success" ng-show="newDay" id="next" onclick=" startFunc(); nextDay();" ng-click="newDay=false; readyDay=true;" >Let a New Day Begin!</button>
+		</td>
+		<td>
+		<button class="btn btn-primary" ng-show="readyDay" onclick="endDay(); resetDay();" ng-click="newDay=true;" id="resetGame">I'm Done for Today!</button>
+		</td>
+		</tr>
+		</table>
+			
+	<!--Daily Findings Area-->
+	<table id="startDrag" border=1>
+		<tr>
+		<td height="50" colspan="10"><div id="noLuck" class="hello" style= "visibility:hidden">Sorry!</div></td></tr>
+		<tr><td height="70" colspan="10"><div id="endGame" class="hello" style= "visibility:hidden">Game Over</div></td></tr>
+		<tr>
+		<td><img id="dragOrange1" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange2" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange3" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange4" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange5" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		</tr><tr>
+		<td><img id="dragOrange6" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange7" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange8" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange9" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		<td><img id="dragOrange10" src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" alt="Smiley Orange" width="35" height="35" style= "visibility:hidden"></td>
+		</tr>
+	</table>
+	
+	</td><td>
+	
+	<!--Dish-->
+	<div id = "dishOranges" ondrop="dropEat(event)" ondragover="allowDrop(event)"> 
+		<img src="http://www.clker.com/cliparts/9/9/f/0/1194984076762834840small_plate.svg.med.png" width=200px height=200px alt= "Empty Dish" id="dish">
+		<span id="marginalUtility" ng-show="showUtility" class="hello" style="position:relative; top:-110px;">0</span>
+	</div>
+	</td></tr></table>
+
+		<!--Control Panel-->	
+	<table class="controlPanel"	width="300">
+		<tr><td>
+		<button class="btn btn-primary" ng-hide="startGame" ng-click="newDay=true; startGame=true; showUtility=true" >Start Game</button>
+		</td><td>
+		<button class="btn btn-primary" ng-click="instructions1=true" >Help</button>
+		</td><td>
+		<button id="toggleControls" class="btn btn-primary">Controls</button>
+	    </td><td>
+		<span class="buttons" id="alive" style="display:none">Game Over</span></td>
+		<td><span class="buttons" id="timeField" style="display:none"><p>Time:</p> 60</span></td></tr>
+		</table>
+		<table id="controls">
+        <td>
+		<button class="btn btn-primary" ng-click="market1=true" >Market</button> 
+		</td>
+		<td>
+		<button class="btn btn-primary" ng-click="surveyPage=true">Survey</button>				
+		</td>
+        </table>
+	<!--Icon for drag image-->	
+		<div id="dragIcon" style="position:absolute; top:200px; left:200px; z-index:-2;">
+<img src="http://www.clker.com/cliparts/2/8/1/4/11949861801973459319orange_simple.svg.med.png" width="35" height="35" ></div>
+
+<!--Instructions-->
+		
+	<div ng-show="instructions1" class="instructions" >
+		<h2>The Orange Game: Overview</h2>
+		<p>In this game, you and other players are castaways stranded on a desert island and cannot leave. </p>
+		<p>Each castaway needs to survive. The island is rich of orange trees. To keep you fit, each day you go alone into the forest and look for oranges. Some days you are lucky and find ten oranges; some other days, you have bad luck and go back to your shelter empty-handed. </p>
+		<p>Each person needs to eat at least an orange a day to keep herself healthy.</p>
+		<button ng-click="instructions2=true; instructions1=false" class="btn btn-primary">Next</button>
+	</div>
+	<div ng-show="instructions2" class="instructions">
+	    <h2>Fitness and Metabolism</h2>
+		<p>Health is measured in fitness points. Life on the island is hard: every day spent on the island costs 5 fitness points.</p>
+		<p>The fitness coming from eating oranges declines the more oranges you eat in a given day, because at some point your body cannot store the nutrients contained in the oranges.</p>
+		<p>The first orange you eat, you get 10 points. The second, 9 points, and so on. The 10th orange gives you 1 fitness point. From the 11th orange you eat, you don't improve your health. </p>
+		<button ng-click="instructions2=false; instructions1=true" class="btn btn-primary">Previous</button>
+		<button ng-click="instructions2=false; instructions3=true" class="btn btn-primary">Next</button>
+	</div>	
+	<div ng-show="instructions3" class="instructions">
+		<h2>Your Decisions</h2>
+		<p>Every day, you may decide how many oranges to <b>save</b> and <b>eat</b>.</p> 
+		<p>To <b>save</b> oranges, just drag and drop them into the <b>basket</b>. To <b>eat</b> oranges, just drag and drop them onto your <b>dish</b>. </p>
+		<p>Of course, in days of bad luck, you can decide to grab oranges from your basket and eat them to keep you fit.</p>
+		<button ng-click="instructions3=false; instructions2=true" class="btn btn-primary">Previous</button>
+		<button ng-click="instructions3=false; instructions4=true" class="btn btn-primary">Next</button>			
+	</div>
+	<div ng-show="instructions4" class="instructions">
+		<h2>Trade Opportunities</h2>
+		<p>Another opportunity to get the oranges you need is trading with others. Every day, you may decide how many oranges from your basket you wish to offer to other castaways in exchange for future help.</p>
+		<p>At the same time, you may ask other players to lend you oranges.</p>
+		<button ng-click="instructions4=false; instructions3=true" class="btn btn-primary" >Previous</button>
+		<button ng-click="instructions4=false; instructions5=true" class="btn btn-primary">Next</button>
+	</div>	
+	<div ng-show="instructions5" class="instructions">
+	    <h2>You Make the Price</h2>
+	    <p>Just click on the "Enter Market" button to access the market lobby in the middle of the island. Remember: you are trading oranges today for oranges tomorrow.</p> 
+		<p>You are free to decide the price with the other players. A board will show you who wishes to lend and borrow what.</p>
+	    <button ng-click="instructions5=false; instructions4=true" class="btn btn-primary">Previous</button>
+		<button ng-click="instructions5=false" class="btn btn-primary">Close</button>
+	</div>  
+	
+	<!--Market-->
+	
+	<div class="market" ng-show="market1">
+		<h2>Welcome to the Orange Market!</h2>
+		<img id="Trade" src="http://www.furrydtails.com/news/weareamemberoflocaltradepartners/local%20trade%20partners%20logo.png" width=100px height=100px alt= "Trade" id="trade" ></img>
+		<h3><i>Your</i> Trade Proposals</h3>
+		<p>In this area, you can make <b>offers</b> and <b>requests</b> to the other castaways.</p>		
+		<p>Transactions happen in real time!</p>
+		<p>I <b>offer</b> these oranges:</p>
+		Quantity (between 0 and 10):
+        <input type="number" name="quantity" min="0" max="10">
+        <!--<input type="submit"class=buttons>This "submit" button will be activated after a Firebase connection is established-->
+		<p>I <b>request</b> these oranges:</p>
+        Quantity (between 0 and 10):
+        <input type="number" name="quantity" min="0" max="10">
+        <!--<input type="submit"class=buttons>This "submit" button will be activated after a Firebase connection is established-->
+		<p>On the next page, you can check out the others' proposals.</p>
+		<button ng-click="market2=true; market1=false"	class="btn btn-primary">Next</button>
+		<button ng-click="market1=false" class="btn btn-primary">Close</button></td></tr>
+	</div>
+	<div  ng-show="market2" class="market" >
+		<h2>Welcome to the Orange Market!</h2>
+		<img id="account" src="http://www.furrydtails.com/news/weareamemberoflocaltradepartners/local%20trade%20partners%20logo.png" width=100px height=100px alt= "Keep Track" style="visibility:visible"></img>
+		<h3><i>Others'</i> Trade Proposals</h3>
+		<p>In this area, you can take a look at the <b>offers</b> and <b>requests</b> of other castaways.</p>
+		<table>
+		<tr><td><b>Player 1</b></td><td><input type="text" placeholder= "Message"><id="message1" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend1" onclick="sendOrange('player1')" class=buttons>Send An Orange</button></td></tr>
+        <tr><td><b>Player 2</b></td><td><input type="text" placeholder= "Message"><id="message2" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend2" onclick="sendOrange('player2')" class=buttons>Send An Orange</button></td></tr> 
+        <tr><td><b>Player 3</b></td><td><input type="text" placeholder= "Message"><id="message3" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend3" onclick="sendOrange('player3')" class=buttons>Send An Orange</button></td></tr>		
+        <tr><td><b>Player 4</b></td><td><input type="text" placeholder= "Message"><id="message4" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend4" onclick="sendOrange('player4')" class=buttons>Send An Orange</button></td></tr>  	
+        <tr><td><b>Player 5</b></td><td><input type="text" placeholder= "Message"><id="message5" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend5" onclick="sendOrange('player5')" class=buttons>Send An Orange</button></td></tr>
+        <tr><td><b>Player 6</b></td><td><input type="text" placeholder= "Message"><id="message6" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend6" onclick="sendOrange('player6')" class=buttons>Send An Orange</button></td></tr>
+        <tr><td><b>Player 7</b></td><td><input type="text" placeholder= "Message"><id="message7" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend7" onclick="sendOrange('player7')" class=buttons>Send An Orange</button></td></tr>
+        <tr><td><b>Player 8</b></td><td><input type="text" placeholder= "Message"><id="message8" onkeyup="javascript: if(event.keyCode==13) {this.value='';} else {sendMessage();"></input></td><td><button id="lend8" onclick="sendOrange('player8')" class=buttons>Send An Orange</button></td></tr>		
+		</table>
+		
+		<!--Need to put stuff here: (1)let other player names pop up with offer and request amount; (2) need to have some communication going on between players 
+(Offer:x amount: accept vs. decline); this once Firebase is up and running.-->
+		
+		<p>On the next page, you get a recap of the overall credit and debit situation on the island.</p>
+		<button ng-click="market2=false; market1=true" class="btn btn-primary">Previous</button>
+		<button ng-click="market2=false; market3=true" class="btn btn-primary">Next</button>
+		<button ng-click="market2=false" class="btn btn-primary">Close</button>
+	</div>
+	<div id="market3" ng-show="market3" class="market" >
+		<h2>Bookkeeping</h2> <img id="account" src="http://files.softicons.com/download/business-icons/financial-accounting-icons-by-artistsvalley/png/256x256/Regular/Abacus.png" width=100px height=100px alt= "Keep Track" id="account" style="visibility:visible"></img>
+		<p>In this area, you can keep track of your credits and debits toward the other castaways.</p>
+        <!--Need to put stuff here: (1)let other player names pop up with the net position vis-a-vis each one; (2) put a global net position standing, broke down by credits and debits; this once Firebase is up and running.-->
+		<p><b>AREA UNDER CONSTRUCTION</b></p>
+		<button ng-click="market2=true; market3=false" class="btn btn-primary">Previous</button>
+		<button ng-click="market3=false;" class="btn btn-primary">Close</button>
+	</div>
+	
+	<!--Survey-->
+	
+	<div ng-show="surveyPage" class="instructions">	
+		<h4>Survey</h4>
+		<p>What is your sex?
+		<select ng-model="survey.q3">
+			<option value="female">female</option>
+			<option value="male">male</option>			
+		</select></p>
+		<p>What is your age?
+		<input type="number" ng-model="survey.q4" min="18" style="width:50px;" >
+		</p>
+		<p>What is your ethnicity?
+		<input type="text" ng-model="survey.q5" >
+		</p>		
+		<p>How did you make your decisions in this study?</p>
+		<tr>
+		<textarea ng-model="survey.q1" rows="2" cols="35"></textarea>		
+		</tr>
+		<p>Please write any other comments about the study below.</p>
+		<tr>
+		<textarea ng-model="survey.q2" rows="2" cols="35"></textarea>			
+		</tr>
+		<p>This is your participant code: {{test}} <br>
+		You will use this code to receive your payment, please write it down before submitting the survey.</p>				
+		<p><button class="btn btn-primary" ng-click="surveyPage=false; saveSurvey();">Submit</button></p>	
+		<p>Your sex is {{survey.q3}}, your age is {{survey.q4}}, test this {{survey}}</p>
+	</div>  		
+</div>				
+</body>
+</html>
